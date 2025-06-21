@@ -1,16 +1,32 @@
 <?php
-add_action('plugins_loaded', 'maiop_initialize_enabled_plugins');
+/**
+ * Initializes enabled sub-plugin classes based on saved options.
+ *
+ * @package My_All_In_One_Plugin
+ */
 
-	function maiop_initialize_enabled_plugins() {
-	$enabled = get_option('maiop_enabled_plugins', []);
+add_action( 'plugins_loaded', 'maiop_initialize_enabled_plugins' );
 
-	foreach ($enabled as $plugin) {
-		$class_file = MAIOP_DIR . 'classes/class-' . sanitize_file_name($plugin) . '.php';
-		if (file_exists($class_file)) {
-			require_once $class_file;
-			$class_name = 'MAIOP_' . str_replace('-', '_', $plugin);
+/**
+ * Loads and instantiates enabled sub-plugin classes.
+ */
+function maiop_initialize_enabled_plugins() {
+	$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
 
-			if (class_exists($class_name)) {
+	if ( ! is_array( $enabled_plugins ) ) {
+		return;
+	}
+
+	foreach ( $enabled_plugins as $plugin_slug ) {
+		$file_name  = 'class-' . sanitize_file_name( $plugin_slug ) . '.php';
+		$class_path = trailingslashit( MAIOP_DIR . 'classes' ) . $file_name;
+
+		if ( file_exists( $class_path ) ) {
+			require_once $class_path;
+
+			$class_name = str_replace( ' ', '_', ucwords( str_replace( '-', ' ', $plugin_slug ) ) );
+
+			if ( class_exists( $class_name ) ) {
 				new $class_name();
 			}
 		}
