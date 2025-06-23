@@ -347,7 +347,7 @@ class Seo_Metaboxes {
 				$seo_meta_description = isset( $post_meta['_seo_meta_description'][0] ) ? $post_meta['_seo_meta_description'][0] : '';
 				$seo_keywords         = isset( $post_meta['_seo_keywords'][0] ) ? $post_meta['_seo_keywords'][0] : '';
 
-				if ( ! empty( $seo_title ) && ! empty( $seo_meta_description ) && ! empty( $seo_keywords ) ) {
+				if ( ! empty( $seo_title ) && ! empty( $seo_meta_description ) ) {
 					// echo sprintf('<!DOCTYPE html>
 					//         <html lang="hi">
 					//         <head itemscope itemtype="http://schema.org/WebSite">
@@ -477,18 +477,27 @@ class Seo_Metaboxes {
 			'type'         => 'string',
 			'single'       => true,
 			'show_in_rest' => true,
+			'auth_callback' => function() {
+			return current_user_can('edit_posts');
+		}
 		]);
 
 		register_post_meta('post', '_seo_meta_description', [
 			'type'         => 'string',
 			'single'       => true,
 			'show_in_rest' => true,
+			'auth_callback' => function() {
+			return current_user_can('edit_posts');
+		}
 		]);
 
 		register_post_meta('post', '_seo_slug_url', [
 			'type'         => 'string',
 			'single'       => true,
 			'show_in_rest' => true,
+			'auth_callback' => function() {
+			return current_user_can('edit_posts');
+		}
 		]);
 	}
 }
