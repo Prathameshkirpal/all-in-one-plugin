@@ -347,18 +347,17 @@ class Seo_Metaboxes {
 				$seo_meta_description = isset( $post_meta['_seo_meta_description'][0] ) ? $post_meta['_seo_meta_description'][0] : '';
 				$seo_keywords         = isset( $post_meta['_seo_keywords'][0] ) ? $post_meta['_seo_keywords'][0] : '';
 
-				if ( ! empty( $seo_title ) && ! empty( $seo_meta_description ) ) {
-					// echo sprintf('<!DOCTYPE html>
-					//         <html lang="hi">
-					//         <head itemscope itemtype="http://schema.org/WebSite">
-					//             <meta charset="UTF-8">
-					//             <meta name="viewport" content="width=device-width, initial-scale=1">
-					//             <link rel="profile" href="http://gmpg.org/xfn/11">
-					//             <meta name="robots" content="max-image-preview:large" />'. "\n");
+				if ( ! empty( $seo_title ) ) {
 					echo '<title>'.$seo_title .'</title>'. "\n";
-					echo '<meta name="keywords" content="' . esc_attr( $seo_keywords ) . '">' . "\n";
-					echo '<meta name="description" content="' . esc_attr( $seo_meta_description ) . '">' . "\n";
 					echo '<meta name="title" content="' . esc_attr( $seo_title ) . '">' . "\n";
+				}
+
+				if ( ! empty( $seo_meta_description ) && isset( $seo_meta_description ) ) {
+					echo '<meta name="description" content="' . esc_attr( $seo_meta_description ) . '">' . "\n";
+				}
+
+				if ( ! empty( $seo_keywords ) && isset( $seo_keywords ) ) {
+					echo '<meta name="keywords" content="' . esc_attr( $seo_keywords ) . '">' . "\n";
 				}
 
 				$article_title                = get_the_title( $ID );
