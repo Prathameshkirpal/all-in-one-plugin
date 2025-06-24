@@ -399,8 +399,8 @@ class Seo_Metaboxes {
 						echo '<meta property="og:site_name" content="' . esc_attr( $site_title ) . '" />' . "\n";
 					}
 					echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
-					echo '<meta name="twitter:site" content="@Filmy_Lifestyle" />' . "\n";
-					echo '<meta name="twitter:creator" content="@Filmy_Lifestyle" />' . "\n";
+					echo '<meta name="twitter:site" content="" />' . "\n";
+					echo '<meta name="twitter:creator" content="" />' . "\n";
 					if( ! empty ( $site_title ) && ! empty ( $site_excerpt) ) {
 						echo '<meta name="twitter:title" content="' . esc_attr( $article_title ) . '" />' . "\n";
 						echo '<meta name="twitter:description" content="' . esc_attr( $article_excerpt ) . '" />' . "\n";
@@ -456,8 +456,8 @@ class Seo_Metaboxes {
 
 			echo '<meta property="og:site_name" content="' . esc_attr( $site_title ) . '" />' . "\n";
 			echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
-			echo '<meta name="twitter:site" content="@Filmy_Lifestyle" />' . "\n";
-			echo '<meta name="twitter:creator" content="@Filmy_Lifestyle" />' . "\n";
+			echo '<meta name="twitter:site" content="" />' . "\n";
+			echo '<meta name="twitter:creator" content="" />' . "\n";
 			echo '<meta name="twitter:title" content="' . esc_attr( $home_page_original_title ) . '" />' . "\n";
 			echo '<meta name="twitter:description" content="' . esc_attr( $home_page_original_description ) . '" />' . "\n";
 			echo '<meta name="twitter:image" content="' . esc_url( $homepage_logo_image_url ) . '" />' . "\n";
