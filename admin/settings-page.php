@@ -36,6 +36,7 @@
 		'schema'        => 'Schema Markup',
 		'contact-us'    => 'Contact Us Form',
 		'sitemap'       => 'Sitemap Generator',
+		'breadcrumb'    => 'Breadcrumb Trail',
 	];
 	?>
 
