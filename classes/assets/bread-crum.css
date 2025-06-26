@@ -1,4 +1,4 @@
-.breadcrumb {
+.breadcrumb-trail {
     /* background-color: #f5f5f5; */
     padding-right : 10px;
     padding-left  : 10px ;
@@ -8,27 +8,27 @@
     /* box-shadow: 0 4px 8px rgba(0, 128, 128, 0.2); */
 }
 
-.breadcrumb a {
+.breadcrumb-trail a {
     color:#dc0505;
     text-decoration: none;
 }
 
-.breadcrumb a:hover {
+.breadcrumb-trail a:hover {
     color: #333333; /* Charcoal on hover */
     text-decoration: underline;
 }
 
-.breadcrumb li {
+.breadcrumb-trail li {
     display: inline;
     font-size: 0.9em;
     color: #333333; /* Charcoal for text */
 }
 
-.breadcrumb li::after {
+.breadcrumb-trail li::after {
     content: " / ";
     color: #999999; /* Light Gray separator */
 }
 
-.breadcrumb li:last-child::after {
+.breadcrumb-trail li:last-child::after {
     content: ""; /* Remove separator after the last breadcrumb item */
 }

@@ -46,6 +46,14 @@ class Seo_Metaboxes {
 			'normal',
 			'high'
 		);
+		add_meta_box(
+			'seo_url_slug_metabox', // Unique ID for the meta box
+			__('SEO URL Slug', 'seo_url_slug'), // Title
+			array( $this, 'render_seo_url_slug_metabox' ), // Callback function to render the content
+			array('post','webstories'), // Post type
+			'normal', // Context: where to display (side, normal, etc.)
+			'high' // Priority
+		);
 	}
 
 
@@ -78,6 +86,24 @@ class Seo_Metaboxes {
 		<?php
 	}
 
+	/** Callback function to render slug url metabox */
+	function render_seo_url_slug_metabox( $post ) {
+		$seo_slug_url = get_post_meta( $post->ID, '_seo_slug_url', true );
+		?>
+		<label for="seo_slug_url"><?php esc_html_e( 'SEO Slug:', 'seo_url_slug' ); ?></label>
+		<input
+			type="text"
+			id="seo_slug_url"
+			name="seo_slug_url"
+			value="<?php echo esc_attr($seo_slug_url); ?>"required
+			style="width: 100%;"
+		/>
+		<p id="slug-warning" style="color: red; display: none;">
+			<?php esc_html_e( 'Please ensure the slug is in English and not empty.', 'seo_url_slug' ); ?>
+		</p>
+		<?php
+	}
+
 	/**
 	 * Function to save meta values.
 	 *
@@ -106,6 +132,11 @@ class Seo_Metaboxes {
 		// Saveing SEO Google News Keywords (optional).
 		if ( isset( $_POST['seo_google_news_keywords'] ) && ! empty( $_POST['seo_google_news_keywords'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			update_post_meta( $post_id, '_seo_google_news_keywords', sanitize_text_field( $_POST['seo_google_news_keywords'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+
+		//Seo slug.
+		if ( array_key_exists( 'seo_slug_url', $_POST ) ) {
+			update_post_meta( $post_id, '_seo_slug_url', sanitize_text_field( $_POST['seo_slug_url'] ) );
 		}
 	}
 
