@@ -19,64 +19,68 @@ class Breadcrumb {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ] );
-		add_action( 'wp_head', [ $this, 'output_breadcrumb' ] );
+		$this->init_output_hook();
 	}
 
 	/**
-	 * Enqueue CSS for breadcrumbs on applicable pages.
-	 *
-	 * @return void
-	 */
-	public function enqueue_styles() {
-		if ( ! is_front_page() && ! is_home() ) {
-			wp_enqueue_style(
-				'breadcrumb-css',
-				plugins_url( 'assets/bread-crum.css', __FILE__ ),
-				array(),
-				null
-			);
-		}
+	 * Hook to buffer and inject breadcrumb HTML after header.
+	*/
+	public function init_output_hook() {
+		add_action( 'template_redirect', array( $this, 'start_output_buffer' ) );
 	}
 
 	/**
-	 * Outputs breadcrumb HTML in head tag for supported pages.
-	 *
-	 * @return void
+	 * Start buffering template output.
 	 */
-	public function output_breadcrumb() {
+	public function start_output_buffer() {
+		ob_start( array( $this, 'inject_breadcrumb_html' ) );
+	}
+
+	/**
+	 * Injects breadcrumb HTML after the opening header tag.
+	 *
+	 * @param string $content Full HTML output.
+	 * @return string Modified output.
+	 */
+	public function inject_breadcrumb_html( $content ) {
 		if ( is_front_page() || is_home() ) {
-			return;
+			return $content;
 		}
 
-		echo '<div class="breadcrumb-trail">';
-		echo '<a href="' . esc_url( home_url( '/' ) ) . '" rel="nofollow">Home</a>';
+		$breadcrumb = '<div class="breadcrumb-wrapper" style="padding:10px 20px;font-size:14px;">';
+		$breadcrumb .= '<a href="' . esc_url( home_url() ) . '" rel="nofollow">Home</a>';
 
 		if ( is_category() || is_single() ) {
-			echo '&nbsp;&nbsp;&#187;&nbsp;&nbsp;';
-			the_category( ' &bull; ' );
+			$breadcrumb .= '&nbsp;&nbsp;&#187;&nbsp;&nbsp;';
+			$breadcrumb .= get_the_category_list( ' &bull; ' );
 
 			if ( is_single() ) {
 				global $post;
-
-				$seo_slug_raw = get_post_meta( $post->ID, '_seo_slug_url', true );
-				$seo_slug     = str_replace( '-', ' ', sanitize_text_field( $seo_slug_raw ) );
+				$meta     = get_post_meta( $post->ID );
+				$seo_slug = isset( $meta['_seo_slug_url'][0] ) ? $meta['_seo_slug_url'][0] : '';
+				$seo_slug = str_replace( '-', ' ', $seo_slug );
 
 				if ( ! empty( $seo_slug ) ) {
-					echo '&nbsp;&nbsp;&#187;&nbsp;&nbsp;' . esc_html( $seo_slug );
+					$breadcrumb .= ' &nbsp;&nbsp;&#187;&nbsp;&nbsp; ';
+					$breadcrumb .= esc_html( $seo_slug );
 				}
 			}
 		} elseif ( is_page() ) {
-			echo '&nbsp;&nbsp;&#187;&nbsp;&nbsp;' . esc_html( get_the_title() );
+			$breadcrumb .= '&nbsp;&nbsp;&#187;&nbsp;&nbsp;';
+			$breadcrumb .= get_the_title();
 		} elseif ( is_search() ) {
-			echo '&nbsp;&nbsp;&#187;&nbsp;&nbsp;Search Results for: ';
-			echo '<em>' . esc_html( get_search_query() ) . '</em>';
+			$breadcrumb .= '&nbsp;&nbsp;&#187;&nbsp;&nbsp;Search Results for "<em>' . esc_html( get_search_query() ) . '</em>"';
 		} elseif ( is_tag() ) {
-			echo '&nbsp;&nbsp;&#187;&nbsp;&nbsp;<a href="' . esc_url( home_url( '/topics' ) ) . '">Topics</a> &#187;&nbsp;';
-			echo esc_html( single_tag_title( '', false ) );
+			$breadcrumb .= '&nbsp;&nbsp;&#187;&nbsp;&nbsp;<a href="' . esc_url( home_url( '/topics' ) ) . '">Topics</a> &#187;&nbsp;';
+			$breadcrumb .= esc_html( single_tag_title( '', false ) );
 		}
 
-		echo '</div>';
+		$breadcrumb .= '</div>';
+
+		// Inject breadcrumb after <header> or </header> or before <main>
+		$content = preg_replace( '/(<\/header>)/i', $breadcrumb . '$1', $content, 1 );
+
+		return $content;
 	}
 
 }
