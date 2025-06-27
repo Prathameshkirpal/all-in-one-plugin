@@ -523,19 +523,20 @@ class Seo_Metaboxes {
 
 	/** Function to save seo_url_slug on database */
 	public function save_and_update_seo_slug( $post_id, $post ) {
+		error_log('this function is working');
 		// Ensure it's the correct post type, not an autosave, and not a revision
-		if (  ( 'post' === $post->post_type || 'webstories' === $post->post_type) && !defined( 'DOING_AUTOSAVE' ) && !wp_is_post_revision( $post_id ) ) {
+		if (  ( 'post' === $post->post_type ) && !defined( 'DOING_AUTOSAVE' ) && !wp_is_post_revision( $post_id ) ) {
 			// Fetch the latest meta box value from $_POST instead of get_post_meta
-			if ( isset( $_POST['_seo_slug_url'] ) ) {
+			if ( isset( $_POST['seo_slug_url'] ) ) {
 				// Get and sanitize the input value from the meta box
-				$seo_slug_url = sanitize_text_field($_POST['_seo_slug_url']);
-				// remove_action('save_post', 'save_and_update_seo_slug', 20);
+				$seo_slug_url = sanitize_text_field($_POST['seo_slug_url']);
+				remove_action('save_post',  array( $this, 'save_and_update_seo_slug' ), 20);
 				// Update the post's slug (post_name)
 				wp_update_post([
 						'ID'        => $post_id,
 						'post_name' => $seo_slug_url,
 				]);
-				// add_action('save_post', 'save_and_update_seo_slug', 20, 2);
+				add_action('save_post', array( $this, 'save_and_update_seo_slug' ), 20, 2);
 			}
 		}
 	}
