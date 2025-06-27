@@ -30,6 +30,8 @@ class Seo_Metaboxes {
 		add_action( 'after_setup_theme', array( $this, 'my_plugin_remove_theme_support' ), 11 );
 		add_action( 'wp_head', array( $this, 'seo_meta_changes' ), 1 );
 		add_action( 'init', array( $this, 'register_custom_post_meta_fields' ) );
+		add_action( 'save_post', array( $this, 'save_and_update_seo_slug' ), 10, 2 );
+
 	}
 
 	/**
@@ -45,6 +47,14 @@ class Seo_Metaboxes {
 			array( 'post' ),
 			'normal',
 			'high'
+		);
+		add_meta_box(
+			'seo_url_slug_metabox', // Unique ID for the meta box
+			__('SEO URL Slug', 'seo_url_slug'), // Title
+			array( $this, 'render_seo_url_slug_metabox' ), // Callback function to render the content
+			array('post','webstories'), // Post type
+			'normal', // Context: where to display (side, normal, etc.)
+			'high' // Priority
 		);
 	}
 
@@ -78,6 +88,24 @@ class Seo_Metaboxes {
 		<?php
 	}
 
+	/** Callback function to render slug url metabox */
+	function render_seo_url_slug_metabox( $post ) {
+		$seo_slug_url = get_post_meta( $post->ID, '_seo_slug_url', true );
+		?>
+		<label for="seo_slug_url"><?php esc_html_e( 'SEO Slug:', 'seo_url_slug' ); ?></label>
+		<input
+			type="text"
+			id="seo_slug_url"
+			name="seo_slug_url"
+			value="<?php echo esc_attr($seo_slug_url); ?>"required
+			style="width: 100%;"
+		/>
+		<p id="slug-warning" style="color: red; display: none;">
+			<?php esc_html_e( 'Please ensure the slug is in English and not empty.', 'seo_url_slug' ); ?>
+		</p>
+		<?php
+	}
+
 	/**
 	 * Function to save meta values.
 	 *
@@ -106,6 +134,11 @@ class Seo_Metaboxes {
 		// Saveing SEO Google News Keywords (optional).
 		if ( isset( $_POST['seo_google_news_keywords'] ) && ! empty( $_POST['seo_google_news_keywords'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			update_post_meta( $post_id, '_seo_google_news_keywords', sanitize_text_field( $_POST['seo_google_news_keywords'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+
+		//Seo slug.
+		if ( array_key_exists( 'seo_slug_url', $_POST ) ) {
+			update_post_meta( $post_id, '_seo_slug_url', sanitize_text_field( $_POST['seo_slug_url'] ) );
 		}
 	}
 
@@ -448,7 +481,7 @@ class Seo_Metaboxes {
 			$home_page_original_description = get_option( 'homepage_original_description' );
 			$homepage_logo_image_url        = get_option( 'home_page_logo_url' );
 			$homepage_logo_image_url_alt    = null;
-			$homepage_logo_image_url_id     = wpcom_vip_attachment_url_to_postid( $homepage_logo_image_url );
+			$homepage_logo_image_url_id     = attachment_url_to_postid( $homepage_logo_image_url );
 
 			if ( $homepage_logo_image_url_id ) {
 				$home_page_logo_details = $this->get_featured_image_details( $homepage_logo_image_url_id );
@@ -484,6 +517,26 @@ class Seo_Metaboxes {
 			echo '<meta name="twitter:image" content="' . esc_url( $homepage_logo_image_url ) . '" />' . "\n";
 			if ( null !== $homepage_logo_image_url_alt ) {
 				echo '<meta name="twitter:image:alt" content="' . esc_attr( $homepage_logo_image_url_alt ) . '" />' . "\n";
+			}
+		}
+	}
+
+	/** Function to save seo_url_slug on database */
+	public function save_and_update_seo_slug( $post_id, $post ) {
+		error_log('this function is working');
+		// Ensure it's the correct post type, not an autosave, and not a revision
+		if (  ( 'post' === $post->post_type ) && !defined( 'DOING_AUTOSAVE' ) && !wp_is_post_revision( $post_id ) ) {
+			// Fetch the latest meta box value from $_POST instead of get_post_meta
+			if ( isset( $_POST['seo_slug_url'] ) ) {
+				// Get and sanitize the input value from the meta box
+				$seo_slug_url = sanitize_text_field($_POST['seo_slug_url']);
+				remove_action('save_post',  array( $this, 'save_and_update_seo_slug' ), 20);
+				// Update the post's slug (post_name)
+				wp_update_post([
+						'ID'        => $post_id,
+						'post_name' => $seo_slug_url,
+				]);
+				add_action('save_post', array( $this, 'save_and_update_seo_slug' ), 20, 2);
 			}
 		}
 	}

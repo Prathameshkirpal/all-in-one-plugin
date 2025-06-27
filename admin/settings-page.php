@@ -28,16 +28,17 @@ update_option('maiop_enabled_plugins', array_values( $enabled_plugins ) );
 wp_send_json_success( ['status' => 'updated'] );
 } );
 
-function maiop_render_settings_page() {
-$enabled = get_option('maiop_enabled_plugins', []);
-$plugin_list = [
-	'seo-metaboxes' => 'SEO Metaboxes',
-	'alsoread'      => 'Also Read',
-	'schema'        => 'Schema Markup',
-	'contact-us'    => 'Contact Us Form',
-	'sitemap'       => 'Sitemap Generator',
-];
-?>
+	function maiop_render_settings_page() {
+	$enabled = get_option('maiop_enabled_plugins', []);
+	$plugin_list = [
+		'seo-metaboxes' => 'SEO Metaboxes',
+		'alsoread'      => 'Also Read',
+		'schema'        => 'Schema Markup',
+		'contact-us'    => 'Contact Us Form',
+		'sitemap'       => 'Sitemap Generator',
+		'breadcrumb'    => 'Breadcrumb Trail',
+	];
+	?>
 
 <div class="wrap">
 	<h1>All-in-One Plugin Modules</h1>
