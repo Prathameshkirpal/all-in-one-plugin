@@ -31,24 +31,14 @@ class Schema {
 	 * @return void
 	 */
 	public function render_schema_markup() {
-		if ( ! is_singular( 'post' ) ) {
-			return;
-		}
-
 		global $post;
 
 		$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
 		$site_name       = get_bloginfo( 'name' );
 		$site_url        = home_url( '/' );
-		$post_url        = get_permalink( $post );
-		$post_title      = get_the_title( $post );
-		$post_desc       = get_the_excerpt( $post );
-		$post_date       = get_the_date( 'c', $post );
-		$author_name     = get_the_author_meta( 'display_name', $post->post_author );
-		$featured_img    = get_the_post_thumbnail_url( $post, 'full' );
 		$logo_url        = get_theme_mod( 'custom_logo' ) ? wp_get_attachment_image_url( get_theme_mod( 'custom_logo' ), 'full' ) : '';
-		$seo_title       = get_post_meta($post->ID,'_seo_title',true);
-		// Website schema.
+
+		// ✅ Website schema (common for both homepage and posts).
 		echo '<script type="application/ld+json">' . wp_json_encode( array(
 			'@context'    => 'https://schema.org',
 			'@type'       => 'WebSite',
@@ -57,7 +47,40 @@ class Schema {
 			'description' => get_bloginfo( 'description' ),
 		), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>';
 
-		// Article schema.
+		// ✅ Homepage breadcrumb (if enabled)
+		if ( is_front_page() || is_home() ) {
+			if ( in_array( 'breadcrumb', $enabled_plugins, true ) ) {
+				echo '<script type="application/ld+json">' . wp_json_encode( array(
+					'@context'        => 'https://schema.org',
+					'@type'           => 'BreadcrumbList',
+					'itemListElement' => array(
+						array(
+							'@type'    => 'ListItem',
+							'position' => 1,
+							'name'     => 'Home',
+							'item'     => $site_url,
+						),
+					),
+				), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>';
+			}
+			return; // 🚫 No further schema needed on homepage
+		}
+
+		// ✅ Skip non-post pages (e.g., archive, search, etc.)
+		if ( ! is_singular( 'post' ) ) {
+			return;
+		}
+
+		// ✅ For single posts: render article and breadcrumb
+		$post_url     = get_permalink( $post );
+		$post_title   = get_the_title( $post );
+		$post_desc    = get_the_excerpt( $post );
+		$post_date    = get_the_date( 'c', $post );
+		$author_name  = get_the_author_meta( 'display_name', $post->post_author );
+		$featured_img = get_the_post_thumbnail_url( $post, 'full' );
+		$seo_title    = get_post_meta( $post->ID, '_seo_title', true );
+
+		// ✅ Article schema
 		echo '<script type="application/ld+json">' . wp_json_encode( array(
 			'@context'         => 'https://schema.org',
 			'@type'            => 'Article',
@@ -83,7 +106,7 @@ class Schema {
 			),
 		), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>';
 
-		// Breadcrumb schema — only if plugin enabled.
+		// ✅ Breadcrumb schema for post (if enabled)
 		if ( in_array( 'breadcrumb', $enabled_plugins, true ) ) {
 			echo '<script type="application/ld+json">' . wp_json_encode( array(
 				'@context'        => 'https://schema.org',
@@ -98,13 +121,12 @@ class Schema {
 					array(
 						'@type'    => 'ListItem',
 						'position' => 2,
-						'name'     => $seo_title,
+						'name'     => $seo_title ? $seo_title : $post_title,
 						'item'     => $post_url,
 					),
 				),
 			), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>';
 		} else {
-			// Optional: show warning in admin or add hidden debug note in source.
 			echo '<!-- Breadcrumb schema not rendered: Breadcrumb subplugin not active -->';
 		}
 	}
