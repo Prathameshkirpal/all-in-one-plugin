@@ -523,23 +523,28 @@ class Seo_Metaboxes {
 
 	/** Function to save seo_url_slug on database */
 	public function save_and_update_seo_slug( $post_id, $post ) {
-		error_log('this function is working');
-		// Ensure it's the correct post type, not an autosave, and not a revision
-		if (  ( 'post' === $post->post_type ) && !defined( 'DOING_AUTOSAVE' ) && !wp_is_post_revision( $post_id ) ) {
-			// Fetch the latest meta box value from $_POST instead of get_post_meta
-			if ( isset( $_POST['seo_slug_url'] ) ) {
-				// Get and sanitize the input value from the meta box
-				$seo_slug_url = sanitize_text_field($_POST['seo_slug_url']);
-				remove_action('save_post',  array( $this, 'save_and_update_seo_slug' ), 20);
-				// Update the post's slug (post_name)
-				wp_update_post([
-						'ID'        => $post_id,
-						'post_name' => $seo_slug_url,
-				]);
-				add_action('save_post', array( $this, 'save_and_update_seo_slug' ), 20, 2);
-			}
+		static $already_saved = false;
+
+		if ( $already_saved ) {
+			return;
+		}
+
+		// Bail if not correct post type or if autosaving or revising
+		if ( 'post' !== $post->post_type || defined( 'DOING_AUTOSAVE' ) || wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['seo_slug_url'] ) ) {
+			$seo_slug_url = sanitize_title( $_POST['seo_slug_url'] );
+
+			$already_saved = true; // 🔐 Prevent infinite loop
+			wp_update_post( [
+				'ID'        => $post_id,
+				'post_name' => $seo_slug_url,
+			] );
 		}
 	}
+
 
 	/**
 	 * Function to register seo metadata fields so that it can be input form the json.
