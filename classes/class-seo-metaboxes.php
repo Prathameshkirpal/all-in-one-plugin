@@ -48,14 +48,6 @@ class Seo_Metaboxes {
 			'normal',
 			'high'
 		);
-		add_meta_box(
-			'seo_url_slug_metabox', // Unique ID for the meta box
-			__('SEO URL Slug', 'seo_url_slug'), // Title
-			array( $this, 'render_seo_url_slug_metabox' ), // Callback function to render the content
-			array('post','webstories'), // Post type
-			'normal', // Context: where to display (side, normal, etc.)
-			'high' // Priority
-		);
 	}
 
 
@@ -72,6 +64,7 @@ class Seo_Metaboxes {
 		$seo_meta_description     = get_post_meta( $post->ID, '_seo_meta_description', true );
 		$seo_keywords             = get_post_meta( $post->ID, '_seo_keywords', true );
 		$seo_google_news_keywords = get_post_meta( $post->ID, '_seo_google_news_keywords', true );
+		$seo_slug_url             = get_post_meta( $post->ID, '_seo_slug_url', true );
 		?>
 
 		<label for="seo_title">SEO Title (required):</label>
@@ -85,19 +78,13 @@ class Seo_Metaboxes {
 
 		<label for="seo_google_news_keywords">SEO Google News Keywords (optional):</label>
 		<input type="text" id="seo_google_news_keywords" name="seo_google_news_keywords" value="<?php echo esc_attr( $seo_google_news_keywords ); ?>" style="width:100%;"><br><br>
-		<?php
-	}
 
-	/** Callback function to render slug url metabox */
-	function render_seo_url_slug_metabox( $post ) {
-		$seo_slug_url = get_post_meta( $post->ID, '_seo_slug_url', true );
-		?>
 		<label for="seo_slug_url"><?php esc_html_e( 'SEO Slug:', 'seo_url_slug' ); ?></label>
 		<input
 			type="text"
 			id="seo_slug_url"
 			name="seo_slug_url"
-			value="<?php echo esc_attr($seo_slug_url); ?>"required
+			value="<?php echo esc_attr( $seo_slug_url ); ?>"required
 			style="width: 100%;"
 		/>
 		<p id="slug-warning" style="color: red; display: none;">
@@ -136,9 +123,9 @@ class Seo_Metaboxes {
 			update_post_meta( $post_id, '_seo_google_news_keywords', sanitize_text_field( $_POST['seo_google_news_keywords'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 
-		//Seo slug.
-		if ( array_key_exists( 'seo_slug_url', $_POST ) ) {
-			update_post_meta( $post_id, '_seo_slug_url', sanitize_text_field( $_POST['seo_slug_url'] ) );
+		// Seo slug.
+		if ( array_key_exists( 'seo_slug_url', $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			update_post_meta( $post_id, '_seo_slug_url', sanitize_text_field( $_POST['seo_slug_url'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 	}
 
@@ -481,7 +468,7 @@ class Seo_Metaboxes {
 			$home_page_original_description = get_option( 'homepage_original_description' );
 			$homepage_logo_image_url        = get_option( 'home_page_logo_url' );
 			$homepage_logo_image_url_alt    = null;
-			$homepage_logo_image_url_id     = attachment_url_to_postid( $homepage_logo_image_url );
+			$homepage_logo_image_url_id     = attachment_url_to_postid( $homepage_logo_image_url ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.attachment_url_to_postid_attachment_url_to_postid
 
 			if ( $homepage_logo_image_url_id ) {
 				$home_page_logo_details = $this->get_featured_image_details( $homepage_logo_image_url_id );
@@ -521,7 +508,11 @@ class Seo_Metaboxes {
 		}
 	}
 
-	/** Function to save seo_url_slug on database */
+	/** Function to save seo_url_slug on database.
+	 *
+	 * @param int    $post_id current post id.
+	 * @param object $post Object of the post.
+	 */
 	public function save_and_update_seo_slug( $post_id, $post ) {
 		static $already_saved = false;
 
@@ -529,19 +520,21 @@ class Seo_Metaboxes {
 			return;
 		}
 
-		// Bail if not correct post type or if autosaving or revising
+		// Bail if not correct post type or if autosaving or revising.
 		if ( 'post' !== $post->post_type || defined( 'DOING_AUTOSAVE' ) || wp_is_post_revision( $post_id ) ) {
 			return;
 		}
 
-		if ( isset( $_POST['seo_slug_url'] ) ) {
-			$seo_slug_url = sanitize_title( $_POST['seo_slug_url'] );
+		if ( isset( $_POST['seo_slug_url'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$seo_slug_url = sanitize_title( $_POST['seo_slug_url'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 			$already_saved = true; // 🔐 Prevent infinite loop
-			wp_update_post( [
-				'ID'        => $post_id,
-				'post_name' => $seo_slug_url,
-			] );
+			wp_update_post(
+				array(
+					'ID'        => $post_id,
+					'post_name' => $seo_slug_url,
+				)
+			);
 		}
 	}
 
