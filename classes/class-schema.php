@@ -51,6 +51,18 @@ class Schema {
 			JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE 
 		) . '</script>';
 
+		// Organization schema
+		echo '<script type="application/ld+json">' . wp_json_encode( [
+			'@context' => 'https://schema.org',
+			'@type'    => 'Organization',
+			'name'     => $site_name,
+			'url'      => $site_url,
+			'logo'     => [
+				'@type' => 'ImageObject',
+				'url'   => $logo_url,
+			],
+		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>';
+
 		// ✅ Homepage breadcrumb (if enabled)
 		if ( is_front_page() || is_home() ) {
 			if ( in_array( 'breadcrumb', $enabled_plugins, true ) ) {
