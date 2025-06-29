@@ -16,15 +16,15 @@ defined( 'ABSPATH' ) || exit;
  */
 class Breadcrumb {
 		/**
-	 * Constructor.
-	 */
+		 * Constructor.
+		 */
 	public function __construct() {
 		$this->init_output_hook();
 	}
 
 	/**
 	 * Hook to buffer and inject breadcrumb HTML after header.
-	*/
+	 */
 	public function init_output_hook() {
 		add_action( 'template_redirect', array( $this, 'start_output_buffer' ) );
 	}
@@ -47,7 +47,7 @@ class Breadcrumb {
 			return $content;
 		}
 
-		$breadcrumb = '<div class="breadcrumb-wrapper" style="padding:10px 20px;font-size:14px;">';
+		$breadcrumb  = '<div class="breadcrumb-wrapper" style="padding:10px 20px;font-size:14px;">';
 		$breadcrumb .= '<a href="' . esc_url( home_url() ) . '" rel="nofollow">Home</a>';
 
 		if ( is_category() || is_single() ) {
@@ -77,7 +77,7 @@ class Breadcrumb {
 
 		$breadcrumb .= '</div>';
 
-		// Inject breadcrumb after <header> or </header> or before <main>
+		// Inject breadcrumb after <header> or </header> or before <main>.
 		$content = preg_replace( '/(<\/header>)/i', $breadcrumb . '$1', $content, 1 );
 
 		return $content;

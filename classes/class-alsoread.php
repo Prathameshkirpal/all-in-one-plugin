@@ -9,6 +9,9 @@
  * @since      1.0.0
  */
 
+/**
+ * Class also read, A sub-plugin class responsible for also read content.
+ */
 class AlsoRead {
 
 	/**
@@ -81,9 +84,9 @@ class AlsoRead {
 					   style='color: #000; text-decoration: none; transition: color 0.3s;'
 					   onmouseover=\"this.style.color='#e63946'\"
 					   onmouseout=\"this.style.color='#000'\">
-						" . esc_html( get_the_title() ) . "
+						" . esc_html( get_the_title() ) . '
 					</a>
-				</li>";
+				</li>';
 			}
 
 			$also_read_html .= '</ul></div>';
@@ -93,10 +96,12 @@ class AlsoRead {
 			// Append to content and save post.
 			$updated_content = $post->post_content . "\n\n" . $also_read_html;
 			remove_action( 'save_post', array( $this, 'inject_also_read_on_publish' ), 10 );
-			wp_update_post( array(
-				'ID'           => $post_id,
-				'post_content' => $updated_content,
-			) );
+			wp_update_post(
+				array(
+					'ID'           => $post_id,
+					'post_content' => $updated_content,
+				) 
+			);
 			add_action( 'save_post', array( $this, 'inject_also_read_on_publish' ), 10, 2 );
 
 			update_post_meta( $post_id, '_also_read_injected', 1 );
