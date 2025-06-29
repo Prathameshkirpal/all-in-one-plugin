@@ -37,7 +37,7 @@ class Schema {
 		$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
 		$site_name       = get_bloginfo( 'name' );
 		$site_url        = home_url( '/' );
-		$logo_url        = get_theme_mod( 'custom_logo' ) ? wp_get_attachment_image_url( get_theme_mod( 'custom_logo' ), 'full' ) : '';
+		$logo_url        = get_option( 'home_page_logo_url',true );
 
 		// ✅ Website schema (common for both homepage and posts).
 		echo '<script type="application/ld+json">' . wp_json_encode(
@@ -98,6 +98,7 @@ class Schema {
 		$author_name  = get_the_author_meta( 'display_name', $post->post_author );
 		$featured_img = get_the_post_thumbnail_url( $post, 'full' );
 		$seo_title    = get_post_meta( $post->ID, '_seo_title', true );
+		$post_content = wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) );
 
 		// ✅ Article schema
 		echo '<script type="application/ld+json">' . wp_json_encode(
@@ -124,6 +125,7 @@ class Schema {
 						'url'   => $logo_url,
 					),
 				),
+				'articleBody' => $post_content,
 			),
 			JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE 
 		) . '</script>';
