@@ -508,7 +508,7 @@ class Seo_Metaboxes {
 		}
 	}
 
-	/** Function to save seo_url_slug on database.
+	/** Function to set seo slug as url.
 	 *
 	 * @param int    $post_id current post id.
 	 * @param object $post Object of the post.
