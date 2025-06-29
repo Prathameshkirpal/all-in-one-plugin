@@ -17,7 +17,7 @@ class Contact_Us {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'maybe_create_contact_page' ) );
+		add_action( 'admin_init', array( $this, 'maybe_create_contact_page' ) );
 	}
 
 	/**
