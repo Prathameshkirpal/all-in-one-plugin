@@ -9,8 +9,10 @@
  * @since      1.0.0
  */
 
+/**
+ * Class responsible for contact us page building.
+ */
 class Contact_Us {
-
 	/**
 	 * Constructor.
 	 */
@@ -24,10 +26,10 @@ class Contact_Us {
 	 * @return void
 	 */
 	public function maybe_create_contact_page() {
-		$page_slug = 'contact-us';
+		$page_slug  = 'contact-us';
 		$page_title = 'Contact Us';
 
-		$existing_page = get_page_by_path( $page_slug );
+		$existing_page = get_page_by_path( $page_slug ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.get_page_by_path_get_page_by_path
 
 		if ( ! $existing_page ) {
 			$page_content = $this->get_contact_form_html();
