@@ -11,7 +11,7 @@ add_action( 'plugins_loaded', 'maiop_initialize_enabled_plugins' );
  * Loads and instantiates enabled sub-plugin classes.
  */
 function maiop_initialize_enabled_plugins() {
-	$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
+	global $enabled_plugins;
 
 	if ( ! is_array( $enabled_plugins ) ) {
 		return;
@@ -25,8 +25,7 @@ function maiop_initialize_enabled_plugins() {
 			require_once $class_path;
 
 			$class_name = str_replace( ' ', '_', ucwords( str_replace( '-', ' ', $plugin_slug ) ) );
-
-			if ( class_exists( $class_name ) ) {
+			if ( class_exists( $class_name ) && 'Auto_Scheduler' !== $class_name ) {
 				new $class_name();
 			}
 		}

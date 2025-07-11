@@ -32,7 +32,7 @@ add_action(
 		if ( ! empty( $_POST['plugin'] && ! empty( $_POST['enabled'] ) ) ) {
 			$plugin_slug     = sanitize_text_field( $_POST['plugin'] );
 			$is_enabled      = 'true' === $_POST['enabled'];
-			$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
+			global $enabled_plugins;
 
 			if ( $is_enabled ) {
 				if ( ! in_array( $plugin_slug, $enabled_plugins ) ) {
@@ -55,12 +55,13 @@ add_action(
 function maiop_render_settings_page() {
 	$enabled     = get_option( 'maiop_enabled_plugins', array() );
 	$plugin_list = array(
-		'seo-metaboxes' => 'SEO Metaboxes',
-		'alsoread'      => 'Also Read',
-		'schema'        => 'Schema Markup',
-		'contact-us'    => 'Contact Us Form',
-		'sitemap'       => 'Sitemap Generator',
-		'breadcrumb'    => 'Breadcrumb Trail',
+		'seo-metaboxes'  => 'SEO Metaboxes',
+		'alsoread'       => 'Also Read',
+		'schema'         => 'Schema Markup',
+		'contact-us'     => 'Contact Us Form',
+		'sitemap'        => 'Sitemap Generator',
+		'breadcrumb'     => 'Breadcrumb Trail',
+		'auto-scheduler' => 'Auto Scheduler',
 	);
 	?>
 
@@ -87,6 +88,9 @@ function maiop_render_settings_page() {
 				if ( 'sitemap' === $slug && in_array( 'sitemap', $enabled ) && class_exists( 'Sitemap' ) ) {
 					$sitemap = new Sitemap();
 					$sitemap->render_plugin_settings_ui();
+				}
+				if ( 'auto-scheduler' === $slug && in_array( 'auto-scheduler', $enabled ) && class_exists( 'Auto_Scheduler' ) ) {
+					$auto_schedular = new Auto_Scheduler();
 				}
 				?>
 
