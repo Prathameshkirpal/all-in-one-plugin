@@ -33,8 +33,7 @@ class Schema {
 	 */
 	public function render_schema_markup() {
 		global $post;
-
-		$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
+		global $enabled_plugins;
 		$site_name       = get_bloginfo( 'name' );
 		$site_url        = home_url( '/' );
 		$logo_url        = get_option( 'home_page_logo_url',true );

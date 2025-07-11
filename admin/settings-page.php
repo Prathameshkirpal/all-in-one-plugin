@@ -32,7 +32,7 @@ add_action(
 		if ( ! empty( $_POST['plugin'] && ! empty( $_POST['enabled'] ) ) ) {
 			$plugin_slug     = sanitize_text_field( $_POST['plugin'] );
 			$is_enabled      = 'true' === $_POST['enabled'];
-			$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
+			global $enabled_plugins;
 
 			if ( $is_enabled ) {
 				if ( ! in_array( $plugin_slug, $enabled_plugins ) ) {

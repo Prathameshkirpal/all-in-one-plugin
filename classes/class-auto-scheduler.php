@@ -151,7 +151,8 @@ class Auto_Scheduler {
 				break;
 			}
 
-			$timestamp = strtotime( '+' . $i . ' days', $today );
+			// Always start from *tomorrow*
+			$timestamp = strtotime( '+' . ( $i + 1 ) . ' days', $today );
 
 			for ( $j = 0; $j < $posts_per_day; $j++ ) {
 				if ( empty( $drafts ) ) {
@@ -160,16 +161,16 @@ class Auto_Scheduler {
 
 				$post = array_shift( $drafts );
 
-				// Skip if already scheduled.
 				if ( get_post_meta( $post->ID, '_auto_scheduler_done', true ) ) {
 					continue;
 				}
 
-				$random_time     = rand( 9 * 3600, 20 * 3600 );
-				$post_date       = date( 'Y-m-d H:i:s', $timestamp + $random_time );
-				$post_date_gmt   = get_gmt_from_date( $post_date );
+				$random_time    = rand( 9 * 3600, 20 * 3600 );
+				$post_date      = date( 'Y-m-d H:i:s', $timestamp + $random_time );
+				$post_date_gmt  = get_gmt_from_date( $post_date );
+				$post_status    = 'future';
 
-				wp_update_post(
+				$result = wp_update_post(
 					array(
 						'ID'            => $post->ID,
 						'post_status'   => $post_status,
@@ -178,7 +179,9 @@ class Auto_Scheduler {
 					)
 				);
 
-				update_post_meta( $post->ID, '_auto_scheduler_done', 1 );
+				if ( ! is_wp_error( $result ) ) {
+					update_post_meta( $post->ID, '_auto_scheduler_done', 1 );
+				}
 			}
 		}
 

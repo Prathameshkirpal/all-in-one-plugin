@@ -11,7 +11,7 @@ add_action( 'plugins_loaded', 'maiop_initialize_enabled_plugins' );
  * Loads and instantiates enabled sub-plugin classes.
  */
 function maiop_initialize_enabled_plugins() {
-	$enabled_plugins = get_option( 'maiop_enabled_plugins', array() );
+	global $enabled_plugins;
 
 	if ( ! is_array( $enabled_plugins ) ) {
 		return;
