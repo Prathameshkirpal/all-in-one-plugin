@@ -25,8 +25,7 @@ function maiop_initialize_enabled_plugins() {
 			require_once $class_path;
 
 			$class_name = str_replace( ' ', '_', ucwords( str_replace( '-', ' ', $plugin_slug ) ) );
-
-			if ( class_exists( $class_name ) ) {
+			if ( class_exists( $class_name ) && 'Auto_Scheduler' !== $class_name ) {
 				new $class_name();
 			}
 		}

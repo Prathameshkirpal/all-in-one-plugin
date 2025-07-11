@@ -113,12 +113,3 @@ Drop or create files in /classes/class-{plugin-slug}.php
 Slug becomes your class: class {Plugin_Slug} (dash converted to underscore, capitalized)
 
 It is autoloaded based on toggled entries in settings.
-
-📦 Plugin Management
-To add or remove subplugins:
-
-Drop or create files in /classes/class-{plugin-slug}.php
-
-Slug becomes your class: class {Plugin_Slug} (dash converted to underscore, capitalized)
-
-It is autoloaded based on toggled entries in settings.
