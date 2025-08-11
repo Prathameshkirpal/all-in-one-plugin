@@ -31,6 +31,7 @@ class Seo_Metaboxes {
 		add_action( 'wp_head', array( $this, 'seo_meta_changes' ), 1 );
 		add_action( 'init', array( $this, 'register_custom_post_meta_fields' ) );
 		add_action( 'save_post', array( $this, 'save_and_update_seo_slug' ), 10, 2 );
+		add_action('admin_footer', array( $this, 'custom_seo_canonical_validation' ) );
 
 	}
 
@@ -65,6 +66,7 @@ class Seo_Metaboxes {
 		$seo_keywords             = get_post_meta( $post->ID, '_seo_keywords', true );
 		$seo_google_news_keywords = get_post_meta( $post->ID, '_seo_google_news_keywords', true );
 		$seo_slug_url             = get_post_meta( $post->ID, '_seo_slug_url', true );
+		$seo_canonical_url        = get_post_meta( $post->ID, '_seo_canonnical_url', true );
 		?>
 
 		<label for="seo_title">SEO Title (required):</label>
@@ -90,7 +92,81 @@ class Seo_Metaboxes {
 		<p id="slug-warning" style="color: red; display: none;">
 			<?php esc_html_e( 'Please ensure the slug is in English and not empty.', 'seo_url_slug' ); ?>
 		</p>
+		<label for="seo_canonnical_url"> SEO Canonical URL: </label>
+		<textarea type="url" id="seo_canonnical_url" name="seo_canonnical_url" required style="width:100%;"><?php echo esc_textarea( $seo_canonical_url ); ?></textarea><br><br>
 		<?php
+	}
+
+	/**
+	 * Function to add validation script on edit post.
+	 * @return void.
+	 */
+	function custom_seo_canonical_validation() {
+		global $pagenow;
+		if ( 'post.php' === $pagenow || 'post-new.php' === $pagenow ) {
+			?>
+			<script>
+				document.addEventListener('DOMContentLoaded', function () {
+					const canonicalField = document.getElementById('seo_canonnical_url');
+					if (!canonicalField) return;
+
+					function isValidUrl(str) {
+						try {
+							new URL(str);
+							return true;
+						} catch (_) {
+							return false;
+						}
+					}
+
+					function validateCanonical(e) {
+						const val = canonicalField.value.trim();
+						if (val === '') return true; // allow empty
+
+						if (!isValidUrl(val)) {
+							e.preventDefault();
+							e.stopPropagation();
+							alert('Invalid Canonical URL! Please enter a valid URL.');
+							return false;
+						}
+						return true;
+					}
+
+					// Handle button clicks (Publish, Update, Save Draft)
+					const observer = new MutationObserver(() => {
+						document.querySelectorAll(
+							'.editor-post-publish-button, ' +
+							'.editor-post-publish-panel__toggle, ' +
+							'.editor-post-save-draft'
+						).forEach(btn => {
+							if (!btn.dataset.listenerAdded) {
+								btn.dataset.listenerAdded = 'true';
+								btn.addEventListener('click', function (e) {
+									if (!validateCanonical(e)) {
+										wp.data.dispatch('core/editor').lockPostSaving('invalid_canonical');
+									} else {
+										wp.data.dispatch('core/editor').unlockPostSaving('invalid_canonical');
+									}
+								}, true);
+							}
+						});
+					});
+					observer.observe(document.body, { childList: true, subtree: true });
+
+					// Handle keyboard shortcuts (Ctrl+S / Cmd+S)
+					window.addEventListener('keydown', function (e) {
+						if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+							if (!validateCanonical(e)) {
+								wp.data.dispatch('core/editor').lockPostSaving('invalid_canonical');
+							} else {
+								wp.data.dispatch('core/editor').unlockPostSaving('invalid_canonical');
+							}
+						}
+					}, true);
+				});
+			</script>
+			<?php
+		}
 	}
 
 	/**
@@ -126,6 +202,10 @@ class Seo_Metaboxes {
 		// Seo slug.
 		if ( array_key_exists( 'seo_slug_url', $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			update_post_meta( $post_id, '_seo_slug_url', sanitize_text_field( $_POST['seo_slug_url'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+		// Seo Canonical
+		if ( isset( $_POST['seo_canonnical_url'] ) && ! empty( $_POST['seo_canonnical_url'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			update_post_meta( $post_id, '_seo_canonnical_url', sanitize_textarea_field( $_POST['seo_canonnical_url'] ) );// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 	}
 
@@ -388,6 +468,7 @@ class Seo_Metaboxes {
 				$seo_title            = isset( $post_meta['_seo_title'][0] ) ? $post_meta['_seo_title'][0] : get_the_title();
 				$seo_meta_description = isset( $post_meta['_seo_meta_description'][0] ) ? $post_meta['_seo_meta_description'][0] : '';
 				$seo_keywords         = isset( $post_meta['_seo_keywords'][0] ) ? $post_meta['_seo_keywords'][0] : '';
+				$seo_canonical_url    = isset( $post_meta['_seo_canonnical_url'][0] ) ? $post_meta['_seo_canonnical_url'][0] : '';
 
 				if ( ! empty( $seo_title ) ) {
 					echo '<title>' . esc_html( $seo_title ) . '</title>' . "\n";
@@ -400,6 +481,13 @@ class Seo_Metaboxes {
 
 				if ( ! empty( $seo_keywords ) && isset( $seo_keywords ) ) {
 					echo '<meta name="keywords" content="' . esc_attr( $seo_keywords ) . '">' . "\n";
+				}
+
+				if ( ! empty( $seo_canonical_url ) && isset ( $seo_canonical_url ) ) {
+					// Remove the default canonical tag
+					remove_action( 'wp_head', 'rel_canonical' );
+					// Add custom canonical tag
+					echo '<link rel="canonical" href="' . $seo_canonical_url . '">' . "\n";
 				}
 
 				$article_title                = get_the_title( $id );
