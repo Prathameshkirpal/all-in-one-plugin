@@ -31,7 +31,7 @@ class Seo_Metaboxes {
 		add_action( 'wp_head', array( $this, 'seo_meta_changes' ), 1 );
 		add_action( 'init', array( $this, 'register_custom_post_meta_fields' ) );
 		add_action( 'save_post', array( $this, 'save_and_update_seo_slug' ), 10, 2 );
-		add_action('admin_footer', array( $this, 'custom_seo_canonical_validation' ) );
+		add_action( 'admin_footer', array( $this, 'custom_seo_canonical_validation' ) );
 
 	}
 
