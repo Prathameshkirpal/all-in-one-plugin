@@ -15,10 +15,12 @@ Each feature is a self-contained **subplugin**, and you can toggle them independ
 
 #### ✅ Post Meta Keys:
 | Key               | Description                 |
-|------------------|-----------------------------|
-| `_seo_title`     | Custom SEO title            |
-| `_seo_slug_url`  | Custom post slug (used to update `post_name`) |
+|------------------    |-----------------------------|
+| `_seo_title`         | Custom SEO title            |
+| `_seo_slug_url`      | Custom post slug (used to update `post_name`) |
+| `_seo_canonnical_url`| Custom canonical URl
 
+_seo_canonnical_url : If it is empty then the default canocial will be created. if not it will check validation on edit page and save the proper url and will replace the canonical url with this custom canonical url.
 ---
 
 ### 2. 🗺 Sitemap
